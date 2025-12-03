@@ -510,7 +510,8 @@
                 <div style="flex-shrink: 0; width: 240px;">
                     <!-- Polaroid photo frame -->
                     <div class="polaroid" style="width: 200px; margin-bottom: 30px;">
-                        <img id="dashboardPhoto" src="photos/1.jpg" alt="Memory" 
+                        <!-- changed initial src to a neutral placeholder; JS will replace with first loaded base64 image -->
+                        <img id="dashboardPhoto" src="https://via.placeholder.com/176x176/ffb3d9/ffffff?text=Loading..." alt="Memory" 
                              style="width: 176px; height: 176px; object-fit: cover; display: block;">
                     </div>
                     
@@ -535,8 +536,8 @@
                                 Every moment with you feels like magic<br>
                                 Your smile lights up my darkest days<br>
                                 In your eyes I found my home<br>
-                                Forever grateful you're mine
-                            </p>
+                                Forever grateful you'r...
+    </p>
                         </div>
                     </div>
                     
@@ -638,7 +639,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div class="bg-orange-200 rounded-3xl p-6 border-4 border-orange-300">
                 <h3 class="text-3xl font-bold mb-4">Note</h3>
-                <textarea id="noteEditor" class="w-full h-32 p-4 rounded-2xl bg-yellow-50 border-2 border-orange-300 focus:outline-none focus:border-orange-400 resize-none" placeholder="Write your spe[...]
+                <textarea id="noteEditor" class="w-full h-32 p-4 rounded-2xl bg-yellow-50 border-2 border-orange-300 focus:outline-none focus:border-orange-400 resize-none" placeholder="Write your spe[...]">
+                </textarea>
                 <button onclick="saveNote()" class="mt-4 bg-orange-400 hover:bg-orange-500 px-6 py-2 rounded-full text-white font-bold">
                     Save Note
                 </button>
@@ -751,7 +753,7 @@
                 // Use placeholder
                 galleryImages = ['https://via.placeholder.com/400x400/ffb3d9/ffffff?text=Add+Photos'];
                 validGalleryImages = galleryImages;
-                photosLoaded = true; // set true so gallery won't keep waiting
+                photosLoaded = true;
             }
         }
         
