@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mahipaglu's cutu cloud</title>
+    <title>Maahipaglu's cutu cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&family=Patrick+Hand&display=swap');
@@ -134,7 +134,7 @@
                 <div style="background: linear-gradient(135deg, #ffb3d9 0%, #ffc9e3 100%); border-radius: 2rem; padding: 24px 28px; box-shadow: 0 6px 12px rgba(255, 182, 193, 0.4);">
                     <div class="flex items-center gap-4" style="flex-wrap: wrap;">
                         <label style="font-size: 1.4rem; font-weight: bold; white-space: nowrap; color: #2d2d2d;">Sarvesh likes?</label>
-                        <input type="text" id="ownerPassword" style="flex: 1; min-width: 150px; padding: 14px 20px; border-radius: 1.5rem; background: #fffacd; border: none; font-size: 1.1rem; outline: none; color: #2d2d2d;" placeholder="type 'mahi' here...">
+                        <input type="text" id="ownerPassword" style="flex: 1; min-width: 150px; padding: 14px 20px; border-radius: 1.5rem; background: #fffacd; border: none; font-size: 1.1rem; outline: none; color: #2d2d2d;" placeholder="type the corre here...">
                     </div>
                 </div>
             </div>
@@ -236,9 +236,9 @@
 
     <script>
         const CONFIG = {
-            ownerPassword: "mahi",
+            ownerPassword: "kuchupuchu",
             strangerCode: "6000302",
-            users: { owner: "Mahi", stranger: "Stranger" }
+            users: { owner: "Maahi", stranger: "Stranger" }
         };
 
         // --- NAVIGATION & INIT ---
@@ -311,15 +311,71 @@
             galleryLoaded = true;
         }
 
+        function isValidBase64(str) {
+            // Remove data URI prefix if present
+            const base64Part = str.includes(',') ? str.split(',')[1] : str;
+            // Check if it's valid Base64 (only contains A-Z, a-z, 0-9, +, /, =)
+            const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+            return base64Part.length > 0 && base64Regex.test(base64Part);
+        }
+
+        function detectImageType(base64String) {
+            // Check for PNG signature
+            if (base64String.startsWith('iVBORw0KGgo') || base64String.includes('iVBORw0KGgo')) {
+                return 'png';
+            }
+            // Check for JPEG signature
+            if (base64String.startsWith('/9j/') || base64String.includes('/9j/')) {
+                return 'jpeg';
+            }
+            // Check for GIF signature
+            if (base64String.startsWith('R0lGOD') || base64String.includes('R0lGOD')) {
+                return 'gif';
+            }
+            // Default to jpeg
+            return 'jpeg';
+        }
+
         function createGalleryItem(base64String, index) {
-            // FIX: Remove all line breaks/enters from the text file and trim whitespace
+            // Remove all line breaks/enters from the text file and trim whitespace
             let cleanStr = base64String.replace(/(\r\n|\n|\r)/gm, "").trim();
 
-            // FIX: Check if the user pasted the header or just the raw code
-            if (!cleanStr.startsWith('data:image')) {
-                // Default to jpeg if raw string, but users should ensure this matches their image type
-                cleanStr = `data:image/jpeg;base64,${cleanStr}`;
+            // Check if string is empty or too short
+            if (!cleanStr || cleanStr.length < 50) {
+                showErrorItem(index, "File is empty or too short");
+                return;
             }
+
+            // Extract base64 part if data URI is present
+            let base64Data = cleanStr;
+            let imageType = 'jpeg';
+            
+            if (cleanStr.startsWith('data:image')) {
+                // Extract type and data
+                const match = cleanStr.match(/data:image\/(\w+);base64,(.+)/);
+                if (match) {
+                    imageType = match[1];
+                    base64Data = match[2];
+                } else {
+                    // Try to extract just the base64 part after comma
+                    const parts = cleanStr.split(',');
+                    if (parts.length > 1) {
+                        base64Data = parts[parts.length - 1];
+                    }
+                }
+            } else {
+                // Try to detect image type from base64 content
+                imageType = detectImageType(base64Data);
+            }
+
+            // Validate Base64 format
+            if (!isValidBase64(base64Data)) {
+                showErrorItem(index, "Invalid Base64 format");
+                return;
+            }
+
+            // Construct the data URI
+            cleanStr = `data:image/${imageType};base64,${base64Data}`;
 
             const wrapper = document.createElement('div');
             // Randomize rotation slightly for cute effect
@@ -335,27 +391,83 @@
             // Add a visual error handler for debugging
             img.onerror = function() {
                 console.error(`Image ${index} failed to load. Check Base64 string in photos/${index}.txt`);
-                wrapper.classList.remove('bg-white');
-                wrapper.classList.add('bg-red-200');
-                wrapper.innerHTML = '<div class="flex items-center justify-center w-full h-full text-sm text-red-700 text-center p-2">Error: Bad data in file '+index+'.txt</div>';
+                showErrorItem(index, "Image failed to decode");
+            };
+
+            img.onload = function() {
+                console.log(`Image ${index} loaded successfully`);
             };
 
             wrapper.appendChild(img);
             document.getElementById('gallery-grid').appendChild(wrapper);
         }
 
+        function showErrorItem(index, message) {
+            const wrapper = document.createElement('div');
+            const rotate = (Math.random() * 6) - 3; 
+            wrapper.className = "w-48 h-48 bg-red-100 p-2 shadow-md border-2 border-red-300";
+            wrapper.style.transform = `rotate(${rotate}deg)`;
+            wrapper.innerHTML = `<div class="flex flex-col items-center justify-center w-full h-full text-xs text-red-700 text-center p-2">
+                <div class="font-bold mb-1">Photo ${index}</div>
+                <div>${message}</div>
+                <div class="text-[10px] mt-1 opacity-75">Check photos/${index}.txt</div>
+            </div>`;
+            document.getElementById('gallery-grid').appendChild(wrapper);
+        }
+
         function updatePreviewImages(base64String) {
             let cleanStr = base64String.replace(/(\r\n|\n|\r)/gm, "").trim();
-            if (!cleanStr.startsWith('data:image')) {
-                cleanStr = `data:image/jpeg;base64,${cleanStr}`;
+            
+            // Validate before using
+            if (!cleanStr || cleanStr.length < 50) {
+                console.warn("Preview image data is empty or too short");
+                return;
             }
+
+            let base64Data = cleanStr;
+            let imageType = 'jpeg';
+            
+            if (cleanStr.startsWith('data:image')) {
+                const match = cleanStr.match(/data:image\/(\w+);base64,(.+)/);
+                if (match) {
+                    imageType = match[1];
+                    base64Data = match[2];
+                } else {
+                    const parts = cleanStr.split(',');
+                    if (parts.length > 1) {
+                        base64Data = parts[parts.length - 1];
+                    }
+                }
+            } else {
+                imageType = detectImageType(base64Data);
+            }
+
+            if (!isValidBase64(base64Data)) {
+                console.warn("Preview image has invalid Base64 format");
+                return;
+            }
+
+            cleanStr = `data:image/${imageType};base64,${base64Data}`;
+            
             // Update login screen flower
             const loginImg = document.getElementById('login-preview-img');
-            if(loginImg) loginImg.src = cleanStr;
+            if(loginImg) {
+                loginImg.onerror = function() {
+                    console.warn("Login preview image failed to load");
+                    loginImg.style.display = 'none';
+                };
+                loginImg.src = cleanStr;
+            }
             
             // Update dashboard polaroid
             const dashImg = document.getElementById('dashboardPhoto');
-            if(dashImg) dashImg.src = cleanStr;
+            if(dashImg) {
+                dashImg.onerror = function() {
+                    console.warn("Dashboard preview image failed to load");
+                    dashImg.style.display = 'none';
+                };
+                dashImg.src = cleanStr;
+            }
         }
 
         // --- AUTH LOGIC ---
@@ -366,7 +478,7 @@
                 showScreen('DASHBOARD');
                 loadGalleryImages(); 
             } else {
-                showError("Galat jawab! 🙈 Try 'mahi'");
+                showError("Galat jawab! 🙈 Try something else");
             }
         }
 
