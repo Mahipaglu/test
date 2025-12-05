@@ -234,7 +234,18 @@
                 
                 <div style="flex: 1; max-width: 650px;">
                     <div class="green-card rounded-3xl p-8 text-white mb-8" style="min-height: 220px;">
-                        <div id="lyricsDisplay" class="rotating-lyrics">
+                        <!-- Spotify Player -->
+                        <div id="spotifyPlayer" style="width: 100%; height: 352px;">
+                            <iframe 
+                                id="spotifyEmbed" 
+                                style="border-radius: 12px; width: 100%; height: 100%;" 
+                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                                loading="lazy"
+                                src="">
+                            </iframe>
+                        </div>
+                        <!-- Lyrics Display (Hidden by default, can be toggled) -->
+                        <div id="lyricsDisplay" class="rotating-lyrics hidden">
                             <h3 class="text-2xl font-bold mb-4" id="songTitle">Tere Bina</h3>
                             <p class="text-base leading-relaxed" id="songLyrics">
                                 Every moment with you feels like magic<br>
@@ -311,6 +322,78 @@
                             Save Note
                         </button>
                     </div>
+
+                    <!-- Spotify Player -->
+                    <div class="bg-pink-50 rounded-2xl p-6 border-2 border-pink-200">
+                        <h3 class="text-xl font-bold mb-4" style="color: #2d2d2d;">🎵 Spotify Player</h3>
+                        <p class="text-sm text-gray-600 mb-3">Add a Spotify song, album, or playlist to play on dashboard</p>
+                        <p class="text-xs text-gray-500 mb-3">Paste Spotify URL (e.g., https://open.spotify.com/track/...)</p>
+                        <input type="text" id="spotifyUrlInput" placeholder="https://open.spotify.com/track/..." 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-pink-300 focus:outline-none focus:border-pink-500" 
+                            style="background: white; color: #2d2d2d;">
+                        <button onclick="saveSpotifyUrl()" 
+                            class="mt-3 bg-pink-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-pink-600 transition cursor-pointer">
+                            Save Spotify URL
+                        </button>
+                        <button onclick="clearSpotifyUrl()" 
+                            class="mt-2 bg-gray-400 text-white px-6 py-2 rounded-lg font-bold hover:bg-gray-500 transition cursor-pointer">
+                            Clear Player
+                        </button>
+                    </div>
+
+                    <!-- Add Photo to Gallery -->
+                    <div class="bg-orange-50 rounded-2xl p-6 border-2 border-orange-200">
+                        <h3 class="text-xl font-bold mb-4" style="color: #2d2d2d;">📸 Add Photo to Gallery</h3>
+                        <p class="text-sm text-gray-600 mb-3">Upload an image to convert to Base64 and add to your gallery</p>
+                        
+                        <div class="mb-4">
+                            <input type="file" id="photoUpload" accept="image/*" onchange="handlePhotoUpload(event)" 
+                                class="w-full px-4 py-2 rounded-lg border-2 border-orange-300 focus:outline-none focus:border-orange-500 cursor-pointer" 
+                                style="background: white; color: #2d2d2d;">
+                        </div>
+
+                        <div id="photoPreviewContainer" class="hidden mb-4">
+                            <p class="text-sm font-bold mb-2" style="color: #2d2d2d;">Preview:</p>
+                            <img id="photoPreview" src="" alt="Preview" 
+                                class="max-w-full h-auto rounded-lg border-2 border-orange-300" 
+                                style="max-height: 200px; object-fit: contain;">
+                        </div>
+
+                        <div id="base64Container" class="hidden mb-4">
+                            <p class="text-sm font-bold mb-2" style="color: #2d2d2d;">Base64 String:</p>
+                            <div class="flex gap-2">
+                                <textarea id="base64Output" rows="4" readonly
+                                    class="flex-1 px-4 py-2 rounded-lg border-2 border-orange-300 bg-gray-50 text-xs font-mono" 
+                                    style="color: #2d2d2d;"></textarea>
+                                <button onclick="copyBase64()" 
+                                    class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition cursor-pointer whitespace-nowrap">
+                                    Copy
+                                </button>
+                            </div>
+                            <div class="mt-3">
+                                <input type="number" id="photoIndexInput" placeholder="Photo number (e.g., 1, 2, 3...)" min="1"
+                                    class="w-full px-4 py-2 rounded-lg border-2 border-orange-300 focus:outline-none focus:border-orange-500" 
+                                    style="background: white; color: #2d2d2d;">
+                                <p class="text-xs text-gray-500 mt-1">Enter the photo number (will be saved as photos/X.txt in GitHub)</p>
+                            </div>
+                            <button onclick="savePhotoToLocal()" 
+                                class="mt-3 bg-orange-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600 transition cursor-pointer">
+                                Save to Local Storage
+                            </button>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-yellow-100 rounded-lg border border-yellow-300">
+                            <p class="text-xs font-bold mb-2" style="color: #2d2d2d;">📝 How to add to GitHub:</p>
+                            <ol class="text-xs text-gray-700 list-decimal list-inside space-y-1">
+                                <li>Upload image above and copy the Base64 string</li>
+                                <li>Go to your GitHub repo → photos folder</li>
+                                <li>Create a new file: <code class="bg-white px-1 rounded">X.txt</code> (X = photo number)</li>
+                                <li>Paste the Base64 string into the file</li>
+                                <li>Commit and push to GitHub</li>
+                                <li>The photo will appear in your gallery!</li>
+                            </ol>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -337,7 +420,8 @@
             ownerPassword: "kuchupuchu",
             strangerCode: "6000302",
             users: { owner: "Maahi", stranger: "Stranger" },
-            flowerImage: "pics/flower.jpg" // Path to flower image in pics folder
+            flowerImage: "pics/flower.jpg", // Path to flower image in pics folder
+            spotifyEmbedUrl: "" // Spotify embed URL (song, album, or playlist)
         };
 
         // Track current user type
@@ -371,6 +455,11 @@
                 loadSettings();
             }
             
+            // Load Spotify player when showing dashboard
+            if (screenId === 'DASHBOARD') {
+                loadSpotifyPlayer();
+            }
+            
             // Update stranger login visibility when showing login screen
             if (screenId === 'LOGIN_MAIN') {
                 const strangerLoginEnabled = localStorage.getItem('strangerLoginEnabled') !== 'false';
@@ -402,12 +491,35 @@
             loader.classList.remove('hidden');
             galleryGrid.classList.add('hidden');
 
+            // First, load photos from localStorage (locally saved)
+            const photoList = JSON.parse(localStorage.getItem('photoList') || '[]');
+            if (photoList.length > 0) {
+                for (const photoIndex of photoList) {
+                    const base64Data = localStorage.getItem(`photo_${photoIndex}`);
+                    if (base64Data) {
+                        createGalleryItem(base64Data, photoIndex);
+                        // Update preview with first local photo
+                        if (photoIndex === Math.min(...photoList)) {
+                            updatePreviewImages(base64Data);
+                        }
+                    }
+                }
+            }
+
+            // Then, load photos from GitHub repo (photos folder)
             let index = 1;
             let keepFetching = true;
+            let firstGitHubPhoto = null;
 
             // Maximum safety limit of 50 photos to prevent infinite loops
             while (keepFetching && index < 50) {
                 try {
+                    // Skip if already loaded from localStorage
+                    if (photoList.includes(index)) {
+                        index++;
+                        continue;
+                    }
+
                     const response = await fetch(`photos/${index}.txt`);
                     
                     if (!response.ok) {
@@ -418,9 +530,9 @@
                     const base64Data = await response.text();
                     createGalleryItem(base64Data, index);
                     
-                    // Update the dashboard/login previews with the first image found
-                    if (index === 1) {
-                        updatePreviewImages(base64Data);
+                    // Store first GitHub photo for preview
+                    if (!firstGitHubPhoto) {
+                        firstGitHubPhoto = base64Data;
                     }
 
                     index++;
@@ -428,6 +540,11 @@
                     console.log("Finished loading images or error:", error);
                     keepFetching = false;
                 }
+            }
+
+            // Update preview with first GitHub photo if no local photos
+            if (firstGitHubPhoto && photoList.length === 0) {
+                updatePreviewImages(firstGitHubPhoto);
             }
 
             loader.classList.add('hidden');
@@ -653,6 +770,13 @@
             if (noteInput) {
                 noteInput.value = savedNote || 'Your special memories live here... ✨';
             }
+
+            // Load Spotify URL
+            const savedSpotifyUrl = localStorage.getItem('spotifyEmbedUrl');
+            const spotifyUrlInput = document.getElementById('spotifyUrlInput');
+            if (spotifyUrlInput) {
+                spotifyUrlInput.value = savedSpotifyUrl || '';
+            }
         }
 
         function toggleStrangerLogin() {
@@ -697,6 +821,157 @@
             showError("Dashboard note saved! ✅");
         }
 
+        function saveSpotifyUrl() {
+            const input = document.getElementById('spotifyUrlInput');
+            const spotifyUrl = input.value.trim();
+            if (!spotifyUrl) {
+                showError("Please enter a Spotify URL!");
+                return;
+            }
+            
+            // Validate Spotify URL
+            if (!spotifyUrl.includes('spotify.com')) {
+                showError("Please enter a valid Spotify URL!");
+                return;
+            }
+            
+            localStorage.setItem('spotifyEmbedUrl', spotifyUrl);
+            loadSpotifyPlayer(); // Reload the player
+            showError("Spotify URL saved! 🎵");
+        }
+
+        function clearSpotifyUrl() {
+            localStorage.removeItem('spotifyEmbedUrl');
+            const spotifyEmbed = document.getElementById('spotifyEmbed');
+            if (spotifyEmbed) {
+                spotifyEmbed.src = '';
+            }
+            const spotifyUrlInput = document.getElementById('spotifyUrlInput');
+            if (spotifyUrlInput) {
+                spotifyUrlInput.value = '';
+            }
+            document.getElementById('spotifyPlayer').style.display = 'none';
+            showError("Spotify player cleared! ✅");
+        }
+
+        // --- PHOTO UPLOAD & BASE64 CONVERSION ---
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showError("Please select an image file!");
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showError("Image too large! Please use images under 5MB.");
+                return;
+            }
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const base64String = e.target.result;
+                const preview = document.getElementById('photoPreview');
+                const previewContainer = document.getElementById('photoPreviewContainer');
+                const base64Container = document.getElementById('base64Container');
+                const base64Output = document.getElementById('base64Output');
+
+                // Show preview
+                preview.src = base64String;
+                previewContainer.classList.remove('hidden');
+
+                // Extract just the base64 data (remove data:image/...;base64, prefix)
+                let base64Data = base64String;
+                if (base64String.includes(',')) {
+                    base64Data = base64String.split(',')[1];
+                }
+
+                // Show base64 string
+                base64Output.value = base64Data;
+                base64Container.classList.remove('hidden');
+
+                // Store the full base64 string temporarily for saving
+                window.tempPhotoBase64 = base64String;
+                window.tempPhotoBase64Data = base64Data;
+            };
+
+            reader.onerror = function() {
+                showError("Error reading file! Please try again.");
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function copyBase64() {
+            const base64Output = document.getElementById('base64Output');
+            if (!base64Output || !base64Output.value) {
+                showError("No Base64 string to copy!");
+                return;
+            }
+
+            base64Output.select();
+            base64Output.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                document.execCommand('copy');
+                showError("Base64 string copied to clipboard! ✅");
+            } catch (err) {
+                // Fallback for modern browsers
+                navigator.clipboard.writeText(base64Output.value).then(() => {
+                    showError("Base64 string copied to clipboard! ✅");
+                }).catch(() => {
+                    showError("Failed to copy! Please select and copy manually.");
+                });
+            }
+        }
+
+        function savePhotoToLocal() {
+            const photoIndex = document.getElementById('photoIndexInput').value.trim();
+            if (!photoIndex || isNaN(photoIndex) || parseInt(photoIndex) < 1) {
+                showError("Please enter a valid photo number!");
+                return;
+            }
+
+            if (!window.tempPhotoBase64Data) {
+                showError("No photo to save! Please upload an image first.");
+                return;
+            }
+
+            const index = parseInt(photoIndex);
+            const storageKey = `photo_${index}`;
+            
+            // Save to localStorage
+            localStorage.setItem(storageKey, window.tempPhotoBase64Data);
+            
+            // Also save the mapping of which photos exist
+            let photoList = JSON.parse(localStorage.getItem('photoList') || '[]');
+            if (!photoList.includes(index)) {
+                photoList.push(index);
+                photoList.sort((a, b) => a - b);
+                localStorage.setItem('photoList', JSON.stringify(photoList));
+            }
+
+            showError(`Photo ${index} saved to local storage! ✅`);
+            
+            // If gallery is already loaded, add the new photo to it
+            const galleryGrid = document.getElementById('gallery-grid');
+            if (galleryGrid && !galleryGrid.classList.contains('hidden')) {
+                createGalleryItem(window.tempPhotoBase64Data, index);
+            }
+            
+            // Reset form
+            document.getElementById('photoUpload').value = '';
+            document.getElementById('photoPreviewContainer').classList.add('hidden');
+            document.getElementById('base64Container').classList.add('hidden');
+            document.getElementById('photoIndexInput').value = '';
+            window.tempPhotoBase64 = null;
+            window.tempPhotoBase64Data = null;
+        }
+
         function loadFlowerPhoto() {
             // Load flower photo from pics folder
             const flowerImg = document.getElementById('login-preview-img');
@@ -708,6 +983,53 @@
             };
             
             flowerImg.src = CONFIG.flowerImage;
+        }
+
+        function loadSpotifyPlayer() {
+            // Load Spotify player from localStorage or CONFIG
+            const savedSpotifyUrl = localStorage.getItem('spotifyEmbedUrl');
+            const spotifyUrl = savedSpotifyUrl || CONFIG.spotifyEmbedUrl;
+            const spotifyEmbed = document.getElementById('spotifyEmbed');
+            const spotifyPlayer = document.getElementById('spotifyPlayer');
+            const lyricsDisplay = document.getElementById('lyricsDisplay');
+            
+            if (spotifyEmbed && spotifyPlayer) {
+                if (spotifyUrl) {
+                    // Convert Spotify URL to embed format if needed
+                    let embedUrl = spotifyUrl;
+                    
+                    // If it's a regular Spotify URL, convert to embed format
+                    if (spotifyUrl.includes('open.spotify.com') && !spotifyUrl.includes('embed')) {
+                        try {
+                            // Extract track/album/playlist ID from URL
+                            const urlParts = spotifyUrl.split('/');
+                            const type = urlParts[3]; // track, album, playlist, etc.
+                            const id = urlParts[4] ? urlParts[4].split('?')[0] : null; // Remove query params
+                            
+                            if (type && id) {
+                                embedUrl = `https://open.spotify.com/embed/${type}/${id}?utm_source=generator`;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing Spotify URL:", e);
+                            showError("Invalid Spotify URL format!");
+                            return;
+                        }
+                    }
+                    
+                    // Show Spotify player and hide lyrics
+                    spotifyPlayer.style.display = 'block';
+                    if (lyricsDisplay) {
+                        lyricsDisplay.classList.add('hidden');
+                    }
+                    spotifyEmbed.src = embedUrl;
+                } else {
+                    // Hide Spotify player and show lyrics if no URL is set
+                    spotifyPlayer.style.display = 'none';
+                    if (lyricsDisplay) {
+                        lyricsDisplay.classList.remove('hidden');
+                    }
+                }
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
